@@ -4,7 +4,6 @@ import AuthLayout from '../components/AuthLayout'
 import InputField from '../components/InputField'
 import { api } from '../lib/api'
 import { setToken } from '../lib/auth'
-import type { ApiErrorBody, AuthResponse } from '../lib/types'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
@@ -15,16 +14,16 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [error, setError] = useState(null)
+  const [fieldErrors, setFieldErrors] = useState({})
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e) {
     e.preventDefault()
     setError(null)
     setFieldErrors({})
     setSubmitting(true)
     try {
-      const res = await api.post<AuthResponse>('/api/auth/register', {
+      const res = await api.post('/api/auth/register', {
         fullName,
         email,
         phoneNumber: phoneNumber || null,
@@ -33,10 +32,10 @@ export default function RegisterPage() {
       })
       setToken(res.data.token)
       navigate('/dashboard', { replace: true })
-    } catch (err: any) {
-      const data: ApiErrorBody | undefined = err?.response?.data
-      setError(data?.message || 'Registration failed. Please try again.')
-      if (data?.errors) setFieldErrors(data.errors)
+    } catch (err) {
+      const data = err && err.response && err.response.data
+      setError((data && data.message) || 'Registration failed. Please try again.')
+      if (data && data.errors) setFieldErrors(data.errors)
     } finally {
       setSubmitting(false)
     }
@@ -44,12 +43,12 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout>
-      <div className="space-y-1">
-        <h1 className="text-xl font-semibold text-slate-900">Create an account</h1>
-        <p className="text-sm text-slate-500">Get started with MDQueue today</p>
+      <div className="header">
+        <h1 className="h1">Create an account</h1>
+        <p className="sub">Get started with MDQueue today</p>
       </div>
 
-      <form onSubmit={onSubmit} className="mt-6 space-y-4">
+      <form onSubmit={onSubmit} className="form">
         <InputField
           label="Full Name"
           placeholder="John Doe"
@@ -102,25 +101,14 @@ export default function RegisterPage() {
           error={fieldErrors.confirmPassword}
         />
 
-        {error ? (
-          <div className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {error}
-          </div>
-        ) : null}
+        {error ? <div className="alert">{error}</div> : null}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:opacity-60"
-        >
+        <button type="submit" disabled={submitting} className="primaryBtn">
           {submitting ? 'Creating…' : 'Create Account'}
         </button>
 
-        <div className="pt-1 text-center text-sm text-slate-600">
-          Already have an account?{' '}
-          <Link to="/login" className="font-medium text-blue-600 hover:text-blue-700">
-            Sign in
-          </Link>
+        <div className="bottomText">
+          Already have an account? <Link className="link" to="/login">Sign in</Link>
         </div>
       </form>
     </AuthLayout>
