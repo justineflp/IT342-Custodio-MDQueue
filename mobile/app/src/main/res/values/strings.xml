@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MDQueue</string>
+
+    <!-- Login Screen -->
+    <string name="login_title">MDQueue</string>
+    <string name="login_subtitle">Welcome back</string>
+    <string name="label_email">Email</string>
+    <string name="hint_email">your.email@example.com</string>
+    <string name="label_password">Password</string>
+    <string name="hint_password">Enter your password</string>
+    <string name="btn_login">Login</string>
+    <string name="btn_login_google">Login with Google</string>
+    <string name="text_no_account">Don\'t have an account? </string>
+    <string name="text_register_link">Register</string>
+
+    <!-- Register Screen -->
+    <string name="register_title">Create Account</string>
+    <string name="register_subtitle">Join MDQueue today</string>
+    <string name="label_full_name">Full Name</string>
+    <string name="hint_full_name">John Doe</string>
+    <string name="label_phone">Phone Number</string>
+    <string name="hint_phone">+1 (555) 123–4567</string>
+    <string name="label_confirm_password">Confirm Password</string>
+    <string name="hint_confirm_password">Confirm your password</string>
+    <string name="btn_create_account">Create Account</string>
+    <string name="text_terms">By creating an account, you agree to our Terms &amp; Privacy.</string>
+    <string name="text_have_account">Already have an account? </string>
+    <string name="text_login_link">Login</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="btn_logout">Logout</string>
+
+    <!-- Validation Messages -->
+    <string name="error_empty_email">Email is required</string>
+    <string name="error_invalid_email">Please enter a valid email</string>
+    <string name="error_empty_password">Password is required</string>
+    <string name="error_short_password">Password must be at least 8 characters</string>
+    <string name="error_empty_name">Full name is required</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="error_server">Server error. Please try again later.</string>
+
+    <string name="loading">Please wait…</string>
+</resources>
