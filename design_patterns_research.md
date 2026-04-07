@@ -1,6 +1,6 @@
 # Software Design Patterns Research Document
 
-**Course**: IT342 – Integrative Programming and Technologies  
+**Course**: IT342 – System Integration and Architecture  
 **Student**: Justine Filip Custodio  
 **Project**: MDQueue – Medical/Doctor Queue Management System  
 **Date**: April 2026
