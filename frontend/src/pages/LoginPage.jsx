@@ -2,8 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import InputField from '../components/InputField'
-import { api } from '../lib/api'
-import { setToken } from '../lib/auth'
+import { authFacade } from '../lib/authFacade'
 
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -23,14 +22,15 @@ export default function LoginPage() {
     setFieldErrors({})
     setSubmitting(true)
     try {
-      const res = await api.post('/api/auth/login', { email, password })
-      setToken(res.data.token)
-      void remember
-      navigate(redirectTo, { replace: true })
-    } catch (err) {
-      const data = err && err.response && err.response.data
-      setError((data && data.message) || 'Login failed. Please try again.')
-      if (data && data.errors) setFieldErrors(data.errors)
+      // Facade Pattern: single call replaces api.post() + setToken() + error parsing
+      const result = await authFacade.login(email, password)
+      if (result.success) {
+        void remember
+        navigate(redirectTo, { replace: true })
+      } else {
+        setError(result.message)
+        if (result.errors) setFieldErrors(result.errors)
+      }
     } finally {
       setSubmitting(false)
     }

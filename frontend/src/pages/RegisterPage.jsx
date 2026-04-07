@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout'
 import InputField from '../components/InputField'
-import { api } from '../lib/api'
-import { setToken } from '../lib/auth'
+import { authFacade } from '../lib/authFacade'
 
 export default function RegisterPage() {
   const navigate = useNavigate()
@@ -23,19 +22,20 @@ export default function RegisterPage() {
     setFieldErrors({})
     setSubmitting(true)
     try {
-      const res = await api.post('/api/auth/register', {
+      // Facade Pattern: single call replaces api.post() + setToken() + error parsing
+      const result = await authFacade.register({
         fullName,
         email,
         phoneNumber: phoneNumber || null,
         password,
         confirmPassword,
       })
-      setToken(res.data.token)
-      navigate('/dashboard', { replace: true })
-    } catch (err) {
-      const data = err && err.response && err.response.data
-      setError((data && data.message) || 'Registration failed. Please try again.')
-      if (data && data.errors) setFieldErrors(data.errors)
+      if (result.success) {
+        navigate('/dashboard', { replace: true })
+      } else {
+        setError(result.message)
+        if (result.errors) setFieldErrors(result.errors)
+      }
     } finally {
       setSubmitting(false)
     }
