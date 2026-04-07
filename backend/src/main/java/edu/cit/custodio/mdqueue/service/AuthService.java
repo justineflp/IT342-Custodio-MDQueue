@@ -4,6 +4,7 @@ import edu.cit.custodio.mdqueue.dto.AuthResponse;
 import edu.cit.custodio.mdqueue.dto.LoginRequest;
 import edu.cit.custodio.mdqueue.dto.RegisterRequest;
 import edu.cit.custodio.mdqueue.entity.User;
+import edu.cit.custodio.mdqueue.event.AuthEventPublisher;
 import edu.cit.custodio.mdqueue.exception.InvalidCredentialsException;
 import edu.cit.custodio.mdqueue.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +17,12 @@ import org.springframework.stereotype.Service;
 /**
  * Service handling authentication operations (login and registration).
  * <p>
- * Uses the <b>Builder Pattern</b> via the centralized {@link #buildAuthResponse} method
- * to construct {@link AuthResponse} objects, eliminating code duplication and ensuring
- * consistent response structure across all auth operations.
+ * Design Patterns used:
+ * <ul>
+ *   <li><b>Builder Pattern</b> — via the centralized {@link #buildAuthResponse} method</li>
+ *   <li><b>Observer Pattern</b> — via {@link AuthEventPublisher} to publish auth events,
+ *       decoupling side-effects (logging, notifications) from the core auth logic</li>
+ * </ul>
  * </p>
  */
 @Service
@@ -28,6 +32,7 @@ public class AuthService {
     private final UserService userService;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final AuthEventPublisher authEventPublisher; // Observer Pattern: event publisher
 
     public AuthResponse register(RegisterRequest request) {
         User user = userService.register(request);
@@ -37,6 +42,9 @@ public class AuthService {
                 .authorities("ROLE_USER")
                 .build();
         String token = jwtService.generateToken(userDetails);
+
+        // Observer Pattern: publish registration event (decoupled side-effects)
+        authEventPublisher.publishRegisterEvent(user);
 
         // Builder Pattern: centralized response construction
         return buildAuthResponse(user, token, "Account created successfully");
@@ -54,6 +62,9 @@ public class AuthService {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             User user = userService.findByEmail(userDetails.getUsername());
             String token = jwtService.generateToken(userDetails);
+
+            // Observer Pattern: publish login event (decoupled side-effects)
+            authEventPublisher.publishLoginEvent(user);
 
             // Builder Pattern: centralized response construction
             return buildAuthResponse(user, token, "Login successful");
