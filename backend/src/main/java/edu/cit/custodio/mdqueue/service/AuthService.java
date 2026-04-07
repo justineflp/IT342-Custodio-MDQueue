@@ -13,6 +13,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service handling authentication operations (login and registration).
+ * <p>
+ * Uses the <b>Builder Pattern</b> via the centralized {@link #buildAuthResponse} method
+ * to construct {@link AuthResponse} objects, eliminating code duplication and ensuring
+ * consistent response structure across all auth operations.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -30,14 +38,8 @@ public class AuthService {
                 .build();
         String token = jwtService.generateToken(userDetails);
 
-        return AuthResponse.builder()
-                .token(token)
-                .type("Bearer")
-                .userId(user.getId())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .message("Account created successfully")
-                .build();
+        // Builder Pattern: centralized response construction
+        return buildAuthResponse(user, token, "Account created successfully");
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -53,16 +55,35 @@ public class AuthService {
             User user = userService.findByEmail(userDetails.getUsername());
             String token = jwtService.generateToken(userDetails);
 
-            return AuthResponse.builder()
-                    .token(token)
-                    .type("Bearer")
-                    .userId(user.getId())
-                    .email(user.getEmail())
-                    .fullName(user.getFullName())
-                    .message("Login successful")
-                    .build();
+            // Builder Pattern: centralized response construction
+            return buildAuthResponse(user, token, "Login successful");
         } catch (org.springframework.security.authentication.BadCredentialsException e) {
             throw new InvalidCredentialsException("Invalid email or password");
         }
+    }
+
+    /**
+     * Builder Pattern: Centralized method for constructing AuthResponse objects.
+     * <p>
+     * This method uses the Builder pattern (via Lombok's @Builder on AuthResponse)
+     * to create consistent, well-structured auth responses. By centralizing the
+     * construction logic, we eliminate duplication between register() and login()
+     * and ensure any future fields are added in a single place.
+     * </p>
+     *
+     * @param user    the authenticated user entity
+     * @param token   the generated JWT token
+     * @param message a human-readable status message
+     * @return a fully constructed AuthResponse
+     */
+    private AuthResponse buildAuthResponse(User user, String token, String message) {
+        return AuthResponse.builder()
+                .token(token)
+                .type("Bearer")
+                .userId(user.getId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .message(message)
+                .build();
     }
 }
