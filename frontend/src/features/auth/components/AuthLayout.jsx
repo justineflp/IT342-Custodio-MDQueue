@@ -1,4 +1,4 @@
-import BrandHeader from '../../shared/components/BrandHeader'
+import BrandHeader from '../../../shared/components/BrandHeader'
 
 export default function AuthLayout({ children }) {
   return (

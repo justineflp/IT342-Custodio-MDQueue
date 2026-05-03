@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import LoginPage from '../features/auth/LoginPage'
+import LoginPage from './LoginPage'
 
 // Mock the api module
-vi.mock('../shared/lib/api', () => ({
+vi.mock('../../shared/lib/api', () => ({
   api: {
     post: vi.fn(),
     get: vi.fn(),
@@ -14,15 +14,15 @@ vi.mock('../shared/lib/api', () => ({
 }))
 
 // Mock the auth module
-vi.mock('../features/auth/lib/auth', () => ({
+vi.mock('./lib/auth', () => ({
   setToken: vi.fn(),
   getToken: vi.fn(() => null),
   clearToken: vi.fn(),
   isLoggedIn: vi.fn(() => false),
 }))
 
-import { api } from '../shared/lib/api'
-import { setToken } from '../features/auth/lib/auth'
+import { api } from '../../shared/lib/api'
+import { setToken } from './lib/auth'
 
 describe('LoginPage', () => {
   beforeEach(() => {
@@ -37,13 +37,17 @@ describe('LoginPage', () => {
     )
   }
 
+  function getSignInButton() {
+    return screen.getByRole('button', { name: 'Sign In' })
+  }
+
   it('FR-09: renders login form with email and password fields', () => {
     renderLogin()
 
     expect(screen.getByText('Welcome back')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('you@example.com')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument()
+    expect(getSignInButton()).toBeInTheDocument()
   })
 
   it('FR-09: renders Sign Up link to register page', () => {
@@ -71,7 +75,7 @@ describe('LoginPage', () => {
 
     await user.type(screen.getByPlaceholderText('you@example.com'), 'test@test.com')
     await user.type(screen.getByPlaceholderText('••••••••'), 'wrongpass')
-    await user.click(screen.getByRole('button', { name: /sign in/i }))
+    await user.click(getSignInButton())
 
     await waitFor(() => {
       expect(screen.getByText('Invalid email or password')).toBeInTheDocument()
@@ -88,7 +92,7 @@ describe('LoginPage', () => {
 
     await user.type(screen.getByPlaceholderText('you@example.com'), 'test@test.com')
     await user.type(screen.getByPlaceholderText('••••••••'), 'password123')
-    await user.click(screen.getByRole('button', { name: /sign in/i }))
+    await user.click(getSignInButton())
 
     await waitFor(() => {
       expect(api.post).toHaveBeenCalledWith('/api/auth/login', {
@@ -108,7 +112,7 @@ describe('LoginPage', () => {
 
     await user.type(screen.getByPlaceholderText('you@example.com'), 'test@test.com')
     await user.type(screen.getByPlaceholderText('••••••••'), 'password123')
-    await user.click(screen.getByRole('button', { name: /sign in/i }))
+    await user.click(getSignInButton())
 
     expect(screen.getByRole('button', { name: /signing in/i })).toBeDisabled()
 

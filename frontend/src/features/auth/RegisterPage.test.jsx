@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
-import RegisterPage from '../features/auth/RegisterPage'
+import RegisterPage from './RegisterPage'
 
 // Mock the api module
-vi.mock('../shared/lib/api', () => ({
+vi.mock('../../shared/lib/api', () => ({
   api: {
     post: vi.fn(),
     get: vi.fn(),
@@ -14,15 +14,15 @@ vi.mock('../shared/lib/api', () => ({
 }))
 
 // Mock the auth module
-vi.mock('../features/auth/lib/auth', () => ({
+vi.mock('./lib/auth', () => ({
   setToken: vi.fn(),
   getToken: vi.fn(() => null),
   clearToken: vi.fn(),
   isLoggedIn: vi.fn(() => false),
 }))
 
-import { api } from '../shared/lib/api'
-import { setToken } from '../features/auth/lib/auth'
+import { api } from '../../shared/lib/api'
+import { setToken } from './lib/auth'
 
 describe('RegisterPage', () => {
   beforeEach(() => {

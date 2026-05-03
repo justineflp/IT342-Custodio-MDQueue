@@ -1,17 +1,17 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import ProtectedRoute from '../shared/components/ProtectedRoute'
+import ProtectedRoute from './ProtectedRoute'
 
 // Mock the auth module
-vi.mock('../features/auth/lib/auth', () => ({
+vi.mock('../../features/auth/lib/auth', () => ({
   isLoggedIn: vi.fn(),
   getToken: vi.fn(),
   setToken: vi.fn(),
   clearToken: vi.fn(),
 }))
 
-import { isLoggedIn } from '../features/auth/lib/auth'
+import { isLoggedIn } from '../../features/auth/lib/auth'
 
 function renderWithRouter(loggedIn) {
   isLoggedIn.mockReturnValue(loggedIn)

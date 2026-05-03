@@ -90,7 +90,7 @@ class JwtServiceTest {
     @DisplayName("Two tokens for the same user are different (unique issuedAt)")
     void generateToken_twiceForSameUser_returnsDifferentTokens() throws InterruptedException {
         String token1 = jwtService.generateToken(userDetails);
-        Thread.sleep(10); // ensure different issuedAt
+        Thread.sleep(1100); // JWT iat has seconds precision, so we need >1s gap
         String token2 = jwtService.generateToken(userDetails);
 
         assertNotEquals(token1, token2);
