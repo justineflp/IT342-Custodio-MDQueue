@@ -1,8 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
-import DashboardPage from './pages/DashboardPage'
-import ProtectedRoute from './components/ProtectedRoute'
+import LoginPage from './features/auth/LoginPage'
+import RegisterPage from './features/auth/RegisterPage'
+import DashboardPage from './features/dashboard/DashboardPage'
+import ProtectedRoute from './shared/components/ProtectedRoute'
 
 export default function App() {
   return (
@@ -22,4 +22,3 @@ export default function App() {
     </Routes>
   )
 }
-
