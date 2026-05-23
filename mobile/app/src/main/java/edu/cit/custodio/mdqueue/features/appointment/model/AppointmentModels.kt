@@ -34,3 +34,12 @@ data class DocumentResponse(
     @SerializedName("fileType") val fileType: String,
     @SerializedName("uploadedAt") val uploadedAt: String
 )
+
+data class DoctorResponse(
+    @SerializedName("id") val id: Long,
+    @SerializedName("fullName") val fullName: String,
+    @SerializedName("email") val email: String?,
+    @SerializedName("specialty") val specialty: String?,
+    @SerializedName("initials") val initials: String?,
+    @SerializedName("color") val color: String?
+)

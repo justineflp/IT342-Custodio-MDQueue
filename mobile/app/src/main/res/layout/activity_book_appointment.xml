@@ -2,73 +2,74 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/background"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="@color/background">
+    android:padding="24dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:text="Book Appointment"
-        android:textSize="22sp"
-        android:textStyle="bold"
         android:textColor="@color/text_primary"
-        android:layout_marginBottom="8dp"/>
+        android:textSize="22sp"
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
         android:text="Select a doctor and time for your consultation."
-        android:textSize="14sp"
         android:textColor="@color/text_secondary"
-        android:layout_marginBottom="24dp"/>
+        android:textSize="14sp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Doctor ID (mock)"
-        android:textColor="@color/text_secondary"
-        android:layout_marginBottom="4dp"/>
-    <EditText
-        android:id="@+id/etDoctorId"
+        android:layout_marginBottom="4dp"
+        android:text="Select Doctor"
+        android:textColor="@color/text_secondary" />
+
+    <Spinner
+        android:id="@+id/spinnerDoctors"
         android:layout_width="match_parent"
         android:layout_height="52dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/bg_input"
-        android:hint="e.g. 2"
-        android:inputType="number"
-        android:paddingHorizontal="16dp"
-        android:layout_marginBottom="16dp"/>
+        android:paddingHorizontal="16dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
         android:text="Date &amp; Time"
-        android:textColor="@color/text_secondary"
-        android:layout_marginBottom="4dp"/>
+        android:textColor="@color/text_secondary" />
+
     <EditText
         android:id="@+id/etDatetime"
         android:layout_width="match_parent"
         android:layout_height="52dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/bg_input"
         android:hint="YYYY-MM-DDTHH:MM:SS"
-        android:paddingHorizontal="16dp"
-        android:layout_marginBottom="16dp"/>
+        android:paddingHorizontal="16dp" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
         android:text="Reason"
-        android:textColor="@color/text_secondary"
-        android:layout_marginBottom="4dp"/>
+        android:textColor="@color/text_secondary" />
+
     <EditText
         android:id="@+id/etReason"
         android:layout_width="match_parent"
         android:layout_height="100dp"
+        android:layout_marginBottom="24dp"
         android:background="@drawable/bg_input"
-        android:hint="Briefly describe your symptoms"
         android:gravity="top"
-        android:padding="16dp"
-        android:layout_marginBottom="24dp"/>
+        android:hint="Briefly describe your symptoms"
+        android:padding="16dp" />
 
     <Button
         android:id="@+id/btnSubmit"
@@ -76,7 +77,7 @@
         android:layout_height="52dp"
         android:background="@drawable/bg_button_primary"
         android:text="Confirm Appointment"
+        android:textAllCaps="false"
         android:textColor="@color/white"
-        android:textStyle="bold"
-        android:textAllCaps="false"/>
+        android:textStyle="bold" />
 </LinearLayout>

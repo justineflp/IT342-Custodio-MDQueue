@@ -18,6 +18,9 @@ import edu.cit.custodio.mdqueue.features.appointment.view.BookAppointmentActivit
 import edu.cit.custodio.mdqueue.features.auth.view.LoginActivity
 import edu.cit.custodio.mdqueue.features.dashboard.DashboardContract
 import edu.cit.custodio.mdqueue.features.dashboard.presenter.DashboardPresenter
+import edu.cit.custodio.mdqueue.features.clinic.view.ClinicsActivity
+import edu.cit.custodio.mdqueue.features.queue.view.QueueStatusActivity
+import edu.cit.custodio.mdqueue.features.queue.model.QueueEntryResponse
 
 class DashboardActivity : AppCompatActivity(), DashboardContract.View {
 
@@ -28,7 +31,14 @@ class DashboardActivity : AppCompatActivity(), DashboardContract.View {
     
     // Patient Section Views
     private lateinit var layoutPatientActions: LinearLayout
+    private lateinit var btnViewClinics: Button
     private lateinit var btnBookAppointment: Button
+    private lateinit var tvActiveQueueTitle: TextView
+    private lateinit var cardActiveQueue: LinearLayout
+    private lateinit var tvQueueClinicName: TextView
+    private lateinit var tvQueueName: TextView
+    private lateinit var tvQueueTicket: TextView
+    private lateinit var btnViewQueueStatus: Button
     private lateinit var cardUpcomingAppointment: LinearLayout
     private lateinit var tvDoctorName: TextView
     private lateinit var tvApptDatetime: TextView
@@ -43,6 +53,7 @@ class DashboardActivity : AppCompatActivity(), DashboardContract.View {
     private lateinit var sessionManager: SessionManager
     private lateinit var presenter: DashboardContract.Presenter
     private var upcomingAppt: AppointmentResponse? = null
+    private var activeQueueEntry: QueueEntryResponse? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +73,7 @@ class DashboardActivity : AppCompatActivity(), DashboardContract.View {
         super.onResume()
         if (sessionManager.getRole() == "PATIENT") {
             presenter.fetchUpcomingAppointment()
+            presenter.fetchActiveQueue()
         }
     }
 
@@ -72,7 +84,15 @@ class DashboardActivity : AppCompatActivity(), DashboardContract.View {
         btnLogout = findViewById(R.id.btnLogout)
 
         layoutPatientActions = findViewById(R.id.layoutPatientActions)
+        btnViewClinics = findViewById(R.id.btnViewClinics)
         btnBookAppointment = findViewById(R.id.btnBookAppointment)
+        tvActiveQueueTitle = findViewById(R.id.tvActiveQueueTitle)
+        cardActiveQueue = findViewById(R.id.cardActiveQueue)
+        tvQueueClinicName = findViewById(R.id.tvQueueClinicName)
+        tvQueueName = findViewById(R.id.tvQueueName)
+        tvQueueTicket = findViewById(R.id.tvQueueTicket)
+        btnViewQueueStatus = findViewById(R.id.btnViewQueueStatus)
+        
         cardUpcomingAppointment = findViewById(R.id.cardUpcomingAppointment)
         tvDoctorName = findViewById(R.id.tvDoctorName)
         tvApptDatetime = findViewById(R.id.tvApptDatetime)
@@ -104,6 +124,7 @@ class DashboardActivity : AppCompatActivity(), DashboardContract.View {
             tvRoleBadge.setBackgroundResource(R.drawable.bg_banner_success)
             tvRoleBadge.backgroundTintList = getColorStateList(R.color.success)
             presenter.fetchUpcomingAppointment()
+            presenter.fetchActiveQueue()
         }
     }
 
@@ -118,6 +139,10 @@ class DashboardActivity : AppCompatActivity(), DashboardContract.View {
             finish()
         }
 
+        btnViewClinics.setOnClickListener {
+            startActivity(Intent(this, ClinicsActivity::class.java))
+        }
+
         btnBookAppointment.setOnClickListener {
             startActivity(Intent(this, BookAppointmentActivity::class.java))
         }
@@ -126,6 +151,18 @@ class DashboardActivity : AppCompatActivity(), DashboardContract.View {
             if (upcomingAppt != null) {
                 val intent = Intent(this, AppointmentDetailActivity::class.java)
                 intent.putExtra("APPOINTMENT_ID", upcomingAppt!!.id)
+                startActivity(intent)
+            }
+        }
+
+        btnViewQueueStatus.setOnClickListener {
+            activeQueueEntry?.let { entry ->
+                val intent = Intent(this, QueueStatusActivity::class.java)
+                intent.putExtra("entry_id", entry.id)
+                intent.putExtra("queue_id", entry.queueId)
+                intent.putExtra("queue_name", entry.queueName)
+                intent.putExtra("clinic_name", entry.clinicName)
+                intent.putExtra("ticket_number", entry.queueNumber)
                 startActivity(intent)
             }
         }
@@ -157,6 +194,22 @@ class DashboardActivity : AppCompatActivity(), DashboardContract.View {
         upcomingAppt = null
         cardUpcomingAppointment.visibility = View.GONE
         tvNoAppointments.visibility = View.VISIBLE
+    }
+
+    override fun showActiveQueue(entry: QueueEntryResponse) {
+        activeQueueEntry = entry
+        tvQueueClinicName.text = entry.clinicName ?: "Clinic"
+        tvQueueName.text = entry.queueName ?: "General Queue"
+        tvQueueTicket.text = "Ticket ${String.format("#%02d", entry.queueNumber)} - Status: ${entry.status}"
+
+        tvActiveQueueTitle.visibility = View.VISIBLE
+        cardActiveQueue.visibility = View.VISIBLE
+    }
+
+    override fun showNoActiveQueue() {
+        activeQueueEntry = null
+        tvActiveQueueTitle.visibility = View.GONE
+        cardActiveQueue.visibility = View.GONE
     }
 
     override fun showError(message: String) {

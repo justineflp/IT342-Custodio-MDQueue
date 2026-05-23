@@ -30,4 +30,7 @@ interface AppointmentApiService {
 
     @GET("appointments/{id}/documents")
     suspend fun getDocuments(@Path("id") appointmentId: Long): Response<ApiResponse<List<DocumentResponse>>>
+
+    @GET("users/doctors")
+    suspend fun getDoctors(): Response<ApiResponse<List<DoctorResponse>>>
 }

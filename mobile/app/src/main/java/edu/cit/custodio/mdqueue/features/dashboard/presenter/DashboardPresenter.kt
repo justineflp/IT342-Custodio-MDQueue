@@ -38,4 +38,28 @@ class DashboardPresenter(
             }
         }
     }
+
+    override fun fetchActiveQueue() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.queueEntryApi.getMyActiveEntries()
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val activeQueues = response.body()!!.data ?: emptyList()
+                        if (activeQueues.isNotEmpty()) {
+                            view.showActiveQueue(activeQueues[0])
+                        } else {
+                            view.showNoActiveQueue()
+                        }
+                    } else {
+                        view.showNoActiveQueue()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    view.showNoActiveQueue()
+                }
+            }
+        }
+    }
 }
