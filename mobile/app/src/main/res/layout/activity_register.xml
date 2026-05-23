@@ -204,7 +204,60 @@
         <!-- Spacer -->
         <View
             android:layout_width="0dp"
-            android:layout_height="18dp" />
+            android:layout_height="10dp" />
+
+        <!-- Role Label -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:text="Select Role"
+            android:textColor="@color/text_primary"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- Role Selector RadioGroup -->
+        <RadioGroup
+            android:id="@+id/rgRole"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="12dp">
+
+            <RadioButton
+                android:id="@+id/rbPatient"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/bg_role_selector"
+                android:button="@null"
+                android:checked="true"
+                android:gravity="center"
+                android:text="Patient"
+                android:textColor="@color/color_role_text"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <RadioButton
+                android:id="@+id/rbDoctor"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_role_selector"
+                android:button="@null"
+                android:gravity="center"
+                android:text="Doctor"
+                android:textColor="@color/color_role_text"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </RadioGroup>
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="10dp" />
 
         <!-- Create Account Button -->
         <Button

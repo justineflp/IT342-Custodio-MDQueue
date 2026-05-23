@@ -1,8 +1,13 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import LoginPage from './pages/LoginPage'
-import RegisterPage from './pages/RegisterPage'
-import DashboardPage from './pages/DashboardPage'
-import ProtectedRoute from './components/ProtectedRoute'
+import LoginPage from './features/auth/LoginPage'
+import RegisterPage from './features/auth/RegisterPage'
+import DashboardPage from './features/dashboard/DashboardPage'
+import AdminDoctorsPage from './features/dashboard/AdminDoctorsPage'
+import BookAppointmentPage from './features/appointment/BookAppointmentPage'
+import AppointmentsPage from './features/appointment/AppointmentsPage'
+import AppointmentDetailPage from './features/appointment/AppointmentDetailPage'
+import ProfilePage from './features/profile/ProfilePage'
+import ProtectedRoute from './shared/components/ProtectedRoute'
 
 export default function App() {
   return (
@@ -18,8 +23,47 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/doctors"
+        element={
+          <ProtectedRoute>
+            <AdminDoctorsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/book-appointment"
+        element={
+          <ProtectedRoute>
+            <BookAppointmentPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-appointments"
+        element={
+          <ProtectedRoute>
+            <AppointmentsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/appointments/:id"
+        element={
+          <ProtectedRoute>
+            <AppointmentDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }
-

@@ -1,0 +1,18 @@
+package edu.cit.custodio.mdqueue.features.auth.api
+
+import edu.cit.custodio.mdqueue.core.network.ApiResponse
+import edu.cit.custodio.mdqueue.features.auth.model.AuthResponse
+import edu.cit.custodio.mdqueue.features.auth.model.LoginRequest
+import edu.cit.custodio.mdqueue.features.auth.model.RegisterRequest
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.POST
+
+interface AuthApiServiceService {
+
+    @POST("/api/auth/register")
+    suspend fun register(@Body request: RegisterRequest): Response<ApiResponse<AuthResponse>>
+
+    @POST("/api/auth/login")
+    suspend fun login(@Body request: LoginRequest): Response<ApiResponse<AuthResponse>>
+}
