@@ -2,6 +2,7 @@ package edu.cit.custodio.mdqueue.features.admin.view
 
 import android.app.AlertDialog
 import edu.cit.custodio.mdqueue.features.clinic.model.ClinicRequest
+import edu.cit.custodio.mdqueue.features.clinic.model.ClinicResponse
 import edu.cit.custodio.mdqueue.features.queue.model.QueueResponse
 import edu.cit.custodio.mdqueue.features.queue.model.QueueRequest
 import edu.cit.custodio.mdqueue.features.queue.model.QueueEntryResponse
@@ -15,7 +16,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import edu.cit.custodio.mdqueue.R
 import edu.cit.custodio.mdqueue.core.network.RetrofitClient
-import edu.cit.custodio.mdqueue.api.models.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

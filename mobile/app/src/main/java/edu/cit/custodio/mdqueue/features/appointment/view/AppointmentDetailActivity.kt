@@ -1,8 +1,90 @@
 package edu.cit.custodio.mdqueue.features.appointment.view
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
+import android.provider.OpenableColumns
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import edu.cit.custodio.mdqueue.R
+import edu.cit.custodio.mdqueue.core.network.RetrofitClient
+import edu.cit.custodio.mdqueue.features.appointment.model.AppointmentResponse
 import edu.cit.custodio.mdqueue.features.appointment.model.DocumentResponse
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
+import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+class AppointmentDetailActivity : AppCompatActivity() {
+
+    private lateinit var btnBack: Button
+    private lateinit var tvStatusBadge: TextView
+    private lateinit var tvApptDatetime: TextView
+    private lateinit var tvParticipant: TextView
+    private lateinit var tvReason: TextView
+    private lateinit var btnUpload: Button
+    private lateinit var tvNoDocuments: TextView
+    private lateinit var layoutDocumentsList: LinearLayout
+
+    private var appointmentId: Long = 0L
+    private val documentsList = mutableListOf<DocumentResponse>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_appointment_detail)
+
+        appointmentId = intent.getLongExtra("APPOINTMENT_ID", 0L)
+
+        btnBack = findViewById(R.id.btnBack)
+        tvStatusBadge = findViewById(R.id.tvStatusBadge)
+        tvApptDatetime = findViewById(R.id.tvApptDatetime)
+        tvParticipant = findViewById(R.id.tvParticipant)
+        tvReason = findViewById(R.id.tvReason)
+        btnUpload = findViewById(R.id.btnUpload)
+        tvNoDocuments = findViewById(R.id.tvNoDocuments)
+        layoutDocumentsList = findViewById(R.id.layoutDocumentsList)
+
+        btnBack.setOnClickListener { finish() }
+
+        btnUpload.setOnClickListener {
+            val intent = Intent(Intent.ACTION_GET_CONTENT)
+            intent.type = "application/pdf"
+            startActivityForResult(intent, 100)
+        }
+
+        loadAppointmentDetails()
+        loadDocuments()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 100 && resultCode == Activity.RESULT_OK && data != null) {
+            data.data?.let { uploadFile(it) }
+        }
+    }
+
+    private fun loadAppointmentDetails() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.appointmentApi.getAppointmentDetails(appointmentId)
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val appt = response.body()!!.data
+                        if (appt != null) {
+                            displayDetails(appt)
                         }
                     }
                 }
@@ -17,10 +99,6 @@ import edu.cit.custodio.mdqueue.features.appointment.model.DocumentResponse
     private fun displayDetails(appt: AppointmentResponse) {
         tvStatusBadge.text = appt.status
         tvApptDatetime.text = "Date & Time: ${appt.appointmentDatetime}"
-        
-        // Quick way to check role - if doctorName is set, and patientName is set...
-        // Actually, we can check SessionManager if we want, but let's just display both or relevant.
-        // For simplicity, we just display doctor's name here if available.
         tvParticipant.text = "Doctor: Dr. ${appt.doctorName}\nPatient: ${appt.patientName}"
         tvReason.text = "Reason: ${appt.reason}"
     }
@@ -54,7 +132,6 @@ import edu.cit.custodio.mdqueue.features.appointment.model.DocumentResponse
         layoutDocumentsList.removeAllViews()
 
         val inflater = LayoutInflater.from(this)
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
 
         for (doc in documentsList) {
             val itemView = inflater.inflate(R.layout.item_medical_document, layoutDocumentsList, false)
@@ -63,8 +140,6 @@ import edu.cit.custodio.mdqueue.features.appointment.model.DocumentResponse
             val btnDownload = itemView.findViewById<Button>(R.id.btnDownload)
 
             tvFileName.text = doc.fileName
-            
-            // Format date if possible, otherwise use raw
             tvUploadedAt.text = "Uploaded: ${doc.uploadedAt}"
 
             btnDownload.setOnClickListener {
@@ -81,7 +156,6 @@ import edu.cit.custodio.mdqueue.features.appointment.model.DocumentResponse
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // We need to copy the Uri contents to a temporary file because Retrofit needs a File
                 val tempFile = copyUriToTempFile(uri)
                 if (tempFile == null) {
                     withContext(Dispatchers.Main) {
@@ -95,8 +169,6 @@ import edu.cit.custodio.mdqueue.features.appointment.model.DocumentResponse
                 val body = MultipartBody.Part.createFormData("file", tempFile.name, requestFile)
 
                 val response = RetrofitClient.appointmentApi.uploadDocument(appointmentId, body)
-                
-                // Cleanup temp file
                 tempFile.delete()
 
                 withContext(Dispatchers.Main) {
@@ -134,8 +206,6 @@ import edu.cit.custodio.mdqueue.features.appointment.model.DocumentResponse
     private fun copyUriToTempFile(uri: Uri): File? {
         try {
             val inputStream = contentResolver.openInputStream(uri) ?: return null
-            
-            // Get original file name
             var fileName = "temp_upload"
             contentResolver.query(uri, null, null, null, null)?.use { cursor ->
                 if (cursor.moveToFirst()) {
