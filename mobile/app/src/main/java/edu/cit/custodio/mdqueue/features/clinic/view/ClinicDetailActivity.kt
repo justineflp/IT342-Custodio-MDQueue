@@ -17,7 +17,7 @@ import edu.cit.custodio.mdqueue.features.clinic.ClinicDetailContract
 import edu.cit.custodio.mdqueue.features.clinic.model.ClinicResponse
 import edu.cit.custodio.mdqueue.features.clinic.presenter.ClinicDetailPresenter
 // Note: we assume QueueStatusActivity is still in ui package for now since it's out of scope
-import edu.cit.custodio.mdqueue.ui.QueueStatusActivity
+import edu.cit.custodio.mdqueue.features.queue.view.QueueStatusActivity
 
 class ClinicDetailActivity : AppCompatActivity(), ClinicDetailContract.View {
 

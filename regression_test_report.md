@@ -134,8 +134,10 @@ Automated tests were executed in the backend using Maven. All tests compiled, lo
 [INFO] Building mdqueue 0.0.1-SNAPSHOT
 [INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ mdqueue ---
 [INFO] Recompiling the module because of changed source code.
-[INFO] Compiling 3 source files with javac [debug parameters release 17] to target/test-classes
+[INFO] Compiling 4 source files with javac [debug parameters release 17] to target/test-classes
 [INFO] --- surefire:3.5.3:test (default-test) @ mdqueue ---
+[INFO] Running edu.cit.custodio.mdqueue.feature.appointment.AppointmentControllerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Running edu.cit.custodio.mdqueue.feature.auth.AuthControllerTest
 [INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Running edu.cit.custodio.mdqueue.feature.queue.QueueControllerTest
@@ -145,12 +147,12 @@ Automated tests were executed in the backend using Maven. All tests compiled, lo
 [INFO] 
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  21.422 s
+[INFO] Total time:  22.366 s
 ```
 
 ---
@@ -165,7 +167,7 @@ Automated tests were executed in the backend using Maven. All tests compiled, lo
 | **FR-QUE-01**  | Queue | Queue Creation | Automated / MockMvc | **PASSED** | Validates authenticated owner creation. |
 | **FR-QUE-02**  | Queue | Join Queue (Entry) | Manual | **PASSED** | Patient waitlist entry succeeds. |
 | **FR-QUE-03**  | Queue | Update Queue Status | Automated / MockMvc | **PASSED** | State transition to COMPLETED successfully mapped. |
-| **FR-APPT-01** | Appt | Appointment Booking | Manual | **PASSED** | API endpoints resolved perfectly after package change. |
+| **FR-APPT-01** | Appt | Appointment Details | Automated / MockMvc | **PASSED** | Endpoint `GET /api/appointments/{id}` verifies secure, single retrieval. |
 | **FR-APPT-02** | Appt | File Attachment | Manual | **PASSED** | File upload to target directory works cleanly. |
 
 ---
@@ -185,6 +187,14 @@ During the vertical slice refactoring and regression testing, the following issu
 ### Issue 3: NullPointerException on Mock Password Mismatch Test Case
 *   **Problem**: The password strength and match validations are performed programmatically in the service layer (`UserService.register()`). Because the test case for password mismatch did not mock the return value, `authService.register` returned `null`, causing a `NullPointerException` when the controller attempted to call `authResponse.getMessage()`.
 *   **Fix**: Stubbed the mock behavior to explicitly throw an `IllegalArgumentException("Password and confirm password do not match")` when the mismatched DTO is passed. This allowed `GlobalExceptionHandler` to gracefully catch the exception, returning the expected `400 Bad Request` status and passing the test.
+
+### Issue 4: Mobile Compilation Errors & Outdated Import Paths
+*   **Problem**: 
+    1. Android Studio Problems panel reported unresolved references to `getAppointmentDetails` in `AppointmentDetailActivity.kt`. This was caused by the missing Retrofit API method signature.
+    2. Unresolved package reference to `ui.QueueStatusActivity` inside `ClinicDetailActivity.kt` after refactoring the mobile code into self-contained feature slices.
+*   **Fix**: 
+    1. Implemented a RESTful `GET /api/appointments/{id}` endpoint in the Spring Boot backend (`AppointmentController` & `AppointmentService`) and added the matching `getAppointmentDetails` signature in Retrofit `AppointmentApiService.kt`.
+    2. Corrected the import of `QueueStatusActivity` in `ClinicDetailActivity.kt` to the new feature slice package path: `edu.cit.custodio.mdqueue.features.queue.view.QueueStatusActivity`. This cleared all 12 mobile compile errors.
 
 ---
 

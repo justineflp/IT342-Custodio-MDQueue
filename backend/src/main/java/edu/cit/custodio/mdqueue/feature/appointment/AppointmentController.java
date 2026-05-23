@@ -58,6 +58,14 @@ public class AppointmentController {
         List<AppointmentResponse> appointments = appointmentService.getAllAppointments();
         return ResponseEntity.ok(ApiResponseAdapter.toSuccessResponse(appointments, "All appointments retrieved"));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<AppointmentResponse>> getAppointmentDetails(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long id) {
+        AppointmentResponse response = appointmentService.getAppointmentDetails(id);
+        return ResponseEntity.ok(ApiResponseAdapter.toSuccessResponse(response, "Appointment details retrieved"));
+    }
     
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<AppointmentResponse>> updateStatus(

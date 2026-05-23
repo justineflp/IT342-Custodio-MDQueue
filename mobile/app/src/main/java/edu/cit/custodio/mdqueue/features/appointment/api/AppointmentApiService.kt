@@ -12,6 +12,9 @@ interface AppointmentApiService {
     @GET("appointments/me")
     suspend fun getMyAppointments(): Response<ApiResponse<List<AppointmentResponse>>>
 
+    @GET("appointments/{id}")
+    suspend fun getAppointmentDetails(@Path("id") id: Long): Response<ApiResponse<AppointmentResponse>>
+
     @PATCH("appointments/{id}/status")
     suspend fun updateStatus(@Path("id") id: Long, @Body statusUpdate: Map<String, String>): Response<ApiResponse<AppointmentResponse>>
 

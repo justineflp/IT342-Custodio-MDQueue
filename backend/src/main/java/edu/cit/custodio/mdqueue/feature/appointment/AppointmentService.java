@@ -57,6 +57,12 @@ public class AppointmentService {
                 .stream().map(this::mapToResponse).collect(Collectors.toList());
     }
 
+    public AppointmentResponse getAppointmentDetails(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+        return mapToResponse(appointment);
+    }
+
     @Transactional
     public AppointmentResponse updateStatus(Long appointmentId, String status) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
