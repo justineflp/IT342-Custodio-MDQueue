@@ -12,6 +12,7 @@ import edu.cit.custodio.mdqueue.R
 import edu.cit.custodio.mdqueue.core.network.RetrofitClient
 import edu.cit.custodio.mdqueue.core.session.SessionManager
 import edu.cit.custodio.mdqueue.features.appointment.model.AppointmentResponse
+import edu.cit.custodio.mdqueue.features.admin.view.AdminQueueActivity
 import edu.cit.custodio.mdqueue.features.appointment.view.AppointmentDetailActivity
 import edu.cit.custodio.mdqueue.features.appointment.view.BookAppointmentActivity
 import edu.cit.custodio.mdqueue.features.auth.view.LoginActivity
@@ -130,7 +131,7 @@ class DashboardActivity : AppCompatActivity(), DashboardContract.View {
         }
 
         btnViewSchedule.setOnClickListener {
-            // Placeholder: in real app, go to schedule activity
+            startActivity(Intent(this, AdminQueueActivity::class.java))
         }
     }
 
