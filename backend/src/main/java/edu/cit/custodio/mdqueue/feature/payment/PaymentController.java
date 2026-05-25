@@ -24,8 +24,8 @@ public class PaymentController {
         String paymentMethodId = payload.get("paymentMethodId");
         Payment payment = paymentService.processSandboxPayment(appointmentId, paymentMethodId);
         
-        if (payment.getStatus() == Payment.Status.SUCCESS) {
-            return ResponseEntity.ok(ApiResponseAdapter.toSuccessResponse(payment, "Payment successful"));
+        if (payment.getStatus() == Payment.Status.SUCCESS || payment.getStatus() == Payment.Status.PENDING) {
+            return ResponseEntity.ok(ApiResponseAdapter.toSuccessResponse(payment, "Payment processed successfully"));
         } else {
             return ResponseEntity.badRequest().body(ApiResponseAdapter.toErrorResponse(400, "Payment failed"));
         }
@@ -33,7 +33,11 @@ public class PaymentController {
 
     @GetMapping("/{appointmentId}")
     public ResponseEntity<ApiResponse<Payment>> getPayment(@PathVariable Long appointmentId) {
-        Payment payment = paymentService.getPaymentDetails(appointmentId);
-        return ResponseEntity.ok(ApiResponseAdapter.toSuccessResponse(payment, "Payment retrieved"));
+        try {
+            Payment payment = paymentService.getPaymentDetails(appointmentId);
+            return ResponseEntity.ok(ApiResponseAdapter.toSuccessResponse(payment, "Payment retrieved"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.ok(ApiResponseAdapter.toSuccessResponse(null, "No payment found yet"));
+        }
     }
 }

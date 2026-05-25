@@ -86,6 +86,22 @@ public class UserController {
         userService.updateSpecialty(user.getId(), specialty.trim());
         return ResponseEntity.ok(ApiResponseAdapter.toSuccessResponse("Updated", "Specialty updated successfully"));
     }
+
+    @PutMapping("/me/password")
+    public ResponseEntity<ApiResponse<String>> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, String> payload) {
+        String currentPassword = payload.get("currentPassword");
+        String newPassword = payload.get("newPassword");
+        String confirmNewPassword = payload.get("confirmNewPassword");
+
+        if (currentPassword == null || newPassword == null || confirmNewPassword == null) {
+            throw new IllegalArgumentException("All password fields are required");
+        }
+
+        userService.changePassword(userDetails.getUsername(), currentPassword, newPassword, confirmNewPassword);
+        return ResponseEntity.ok(ApiResponseAdapter.toSuccessResponse("Updated", "Password changed successfully"));
+    }
     
     private String getInitials(String fullName) {
         if (fullName == null || fullName.isBlank()) return "DR";

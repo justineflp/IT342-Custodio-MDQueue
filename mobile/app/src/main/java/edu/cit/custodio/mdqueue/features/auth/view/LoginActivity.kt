@@ -77,7 +77,42 @@ class LoginActivity : AppCompatActivity(), LoginContract.View {
         }
 
         btnGoogleLogin.setOnClickListener {
-            Toast.makeText(this, "Google Login coming soon!", Toast.LENGTH_SHORT).show()
+            val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+            builder.setTitle("🔧 Google Login (Dev Mode)")
+            
+            val container = LinearLayout(this)
+            container.orientation = LinearLayout.VERTICAL
+            val lp = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            val marginInDp = 20
+            val scale = resources.displayMetrics.density
+            val marginInPx = (marginInDp * scale + 0.5f).toInt()
+            lp.setMargins(marginInPx, marginInPx, marginInPx, marginInPx)
+            
+            val input = EditText(this)
+            input.layoutParams = lp
+            input.hint = "developer@example.com"
+            input.setText("james@gmail.com") // Pre-populate for ease of testing!
+            container.addView(input)
+            builder.setView(container)
+
+            builder.setPositiveButton("Simulate Log In") { dialog, _ ->
+                val email = input.text.toString().trim()
+                if (email.isNotEmpty() && email.contains("@")) {
+                    val mockToken = "mock_google_token_$email"
+                    presenter.loginWithGoogle(mockToken)
+                    dialog.dismiss()
+                } else {
+                    Toast.makeText(this, "Please enter a valid email address.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            builder.setNegativeButton("Cancel") { dialog, _ ->
+                dialog.cancel()
+            }
+
+            builder.show()
         }
 
         tvRegisterLink.setOnClickListener {

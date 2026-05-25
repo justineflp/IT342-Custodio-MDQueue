@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.MediaType;
@@ -75,8 +76,20 @@ public class AppointmentController {
             return ResponseEntity.badRequest()
                     .body(ApiResponseAdapter.toErrorResponse(400, "Status is required"));
         }
+        
+        String amountDueStr = payload.get("amountDue");
+        java.math.BigDecimal amountDue = null;
+        if (amountDueStr != null && !amountDueStr.isBlank()) {
+            try {
+                amountDue = new java.math.BigDecimal(amountDueStr);
+            } catch (NumberFormatException e) {
+                return ResponseEntity.badRequest()
+                        .body(ApiResponseAdapter.toErrorResponse(400, "Invalid amount due format"));
+            }
+        }
+        
         return ResponseEntity.ok(ApiResponseAdapter.toSuccessResponse(
-                appointmentService.updateStatus(id, status), "Status updated"));
+                appointmentService.updateStatus(id, status, amountDue), "Status updated"));
     }
 
     @PostMapping("/{id}/documents")
@@ -97,6 +110,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/documents/{docId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<byte[]> downloadDocument(@PathVariable Long docId) {
         MedicalDocument doc = appointmentService.getDocument(docId);
         return ResponseEntity.ok()

@@ -35,9 +35,14 @@ class AppointmentDetailActivity : AppCompatActivity() {
     private lateinit var tvApptDatetime: TextView
     private lateinit var tvParticipant: TextView
     private lateinit var tvReason: TextView
+    private lateinit var tvAmountDue: TextView
     private lateinit var btnUpload: Button
     private lateinit var tvNoDocuments: TextView
     private lateinit var layoutDocumentsList: LinearLayout
+    private lateinit var layoutDoctorActions: LinearLayout
+    private lateinit var btnConfirmAppt: Button
+    private lateinit var btnCancelAppt: Button
+    private lateinit var sessionManager: edu.cit.custodio.mdqueue.core.session.SessionManager
 
     private var appointmentId: Long = 0L
     private val documentsList = mutableListOf<DocumentResponse>()
@@ -53,15 +58,25 @@ class AppointmentDetailActivity : AppCompatActivity() {
         tvApptDatetime = findViewById(R.id.tvApptDatetime)
         tvParticipant = findViewById(R.id.tvParticipant)
         tvReason = findViewById(R.id.tvReason)
+        tvAmountDue = findViewById(R.id.tvAmountDue)
         btnUpload = findViewById(R.id.btnUpload)
         tvNoDocuments = findViewById(R.id.tvNoDocuments)
         layoutDocumentsList = findViewById(R.id.layoutDocumentsList)
+        
+        sessionManager = edu.cit.custodio.mdqueue.core.session.SessionManager(this)
+        layoutDoctorActions = findViewById(R.id.layoutDoctorActions)
+        btnConfirmAppt = findViewById(R.id.btnConfirmAppt)
+        btnCancelAppt = findViewById(R.id.btnCancelAppt)
+
+        btnConfirmAppt.setOnClickListener { showConfirmAmountDialog() }
+        btnCancelAppt.setOnClickListener { updateAppointmentStatus("CANCELLED") }
 
         btnBack.setOnClickListener { finish() }
 
         btnUpload.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT)
-            intent.type = "application/pdf"
+            intent.type = "*/*"
+            intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/pdf", "image/*"))
             startActivityForResult(intent, 100)
         }
 
@@ -101,6 +116,83 @@ class AppointmentDetailActivity : AppCompatActivity() {
         tvApptDatetime.text = "Date & Time: ${appt.appointmentDatetime}"
         tvParticipant.text = "Doctor: Dr. ${appt.doctorName}\nPatient: ${appt.patientName}"
         tvReason.text = "Reason: ${appt.reason}"
+
+        val amountStr = if (appt.amountDue != null) {
+            String.format(Locale.US, "Amount Due: ₱%.2f", appt.amountDue)
+        } else {
+            "Amount Due: Not set yet (Pending Confirmation)"
+        }
+        tvAmountDue.text = amountStr
+
+        if (sessionManager.getRole() == "DOCTOR" && appt.status == "PENDING") {
+            layoutDoctorActions.visibility = View.VISIBLE
+        } else {
+            layoutDoctorActions.visibility = View.GONE
+        }
+    }
+
+    private fun showConfirmAmountDialog() {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("Confirm Appointment")
+        builder.setMessage("Please enter the custom consultation/billing amount due (PHP):")
+
+        val input = android.widget.EditText(this)
+        input.inputType = android.view.inputmethod.EditorInfo.TYPE_CLASS_NUMBER or android.view.inputmethod.EditorInfo.TYPE_NUMBER_FLAG_DECIMAL
+        input.hint = "e.g. 1500.00"
+        builder.setView(input)
+
+        builder.setPositiveButton("Confirm") { _, _ ->
+            val amountStr = input.text.toString().trim()
+            if (amountStr.isEmpty()) {
+                Toast.makeText(this, "Please enter a valid amount", Toast.LENGTH_SHORT).show()
+                return@setPositiveButton
+            }
+            try {
+                val amount = amountStr.toDouble()
+                if (amount <= 0) {
+                    Toast.makeText(this, "Amount must be greater than zero", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                updateAppointmentStatus("CONFIRMED", amountStr)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Invalid number format", Toast.LENGTH_SHORT).show()
+            }
+        }
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.cancel()
+        }
+        builder.show()
+    }
+
+    private fun updateAppointmentStatus(newStatus: String, amountDue: String? = null) {
+        btnConfirmAppt.isEnabled = false
+        btnCancelAppt.isEnabled = false
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val body = mutableMapOf("status" to newStatus)
+                if (amountDue != null) {
+                    body["amountDue"] = amountDue
+                }
+                val response = RetrofitClient.appointmentApi.updateStatus(appointmentId, body)
+                withContext(Dispatchers.Main) {
+                    btnConfirmAppt.isEnabled = true
+                    btnCancelAppt.isEnabled = true
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        Toast.makeText(this@AppointmentDetailActivity, "Appointment updated to $newStatus!", Toast.LENGTH_SHORT).show()
+                        loadAppointmentDetails()
+                    } else {
+                        Toast.makeText(this@AppointmentDetailActivity, "Failed to update status", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    btnConfirmAppt.isEnabled = true
+                    btnCancelAppt.isEnabled = true
+                    Toast.makeText(this@AppointmentDetailActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     private fun loadDocuments() {
@@ -198,7 +290,7 @@ class AppointmentDetailActivity : AppCompatActivity() {
     }
 
     private fun downloadDocument(docId: Long) {
-        val downloadUrl = "http://10.0.2.2:8080/api/appointments/documents/$docId"
+        val downloadUrl = "${RetrofitClient.BASE_URL}api/appointments/documents/$docId"
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl))
         startActivity(intent)
     }

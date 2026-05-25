@@ -6,31 +6,49 @@ import retrofit2.Response
 import retrofit2.http.*
 
 interface AppointmentApiService {
-    @POST("appointments")
+    @POST("/api/appointments")
     suspend fun createAppointment(@Body request: AppointmentRequest): Response<ApiResponse<AppointmentResponse>>
 
-    @GET("appointments/me")
+    @GET("/api/appointments/me")
     suspend fun getMyAppointments(): Response<ApiResponse<List<AppointmentResponse>>>
 
-    @GET("appointments/{id}")
+    @GET("/api/appointments/{id}")
     suspend fun getAppointmentDetails(@Path("id") id: Long): Response<ApiResponse<AppointmentResponse>>
 
-    @PATCH("appointments/{id}/status")
+    @PATCH("/api/appointments/{id}/status")
     suspend fun updateStatus(@Path("id") id: Long, @Body statusUpdate: Map<String, String>): Response<ApiResponse<AppointmentResponse>>
 
-    @POST("payments/{id}/process")
+    @POST("/api/payments/{id}/process")
     suspend fun processPayment(@Path("id") id: Long, @Body request: PaymentRequest): Response<ApiResponse<PaymentResponse>>
 
     @Multipart
-    @POST("appointments/{id}/documents")
+    @POST("/api/appointments/{id}/documents")
     suspend fun uploadDocument(
         @Path("id") appointmentId: Long,
         @Part file: okhttp3.MultipartBody.Part
     ): Response<ApiResponse<DocumentResponse>>
 
-    @GET("appointments/{id}/documents")
+    @GET("/api/appointments/{id}/documents")
     suspend fun getDocuments(@Path("id") appointmentId: Long): Response<ApiResponse<List<DocumentResponse>>>
 
-    @GET("users/doctors")
+    @GET("/api/users/doctors")
     suspend fun getDoctors(): Response<ApiResponse<List<DoctorResponse>>>
+
+    @GET("/api/users/admin/doctors")
+    suspend fun getAdminDoctors(): Response<ApiResponse<List<AdminDoctorResponse>>>
+
+    @PATCH("/api/users/admin/doctors/{id}/approve")
+    suspend fun approveDoctor(@Path("id") id: Long): Response<ApiResponse<String>>
+
+    @PATCH("/api/users/me/specialty")
+    suspend fun updateSpecialty(@Body payload: Map<String, String>): Response<ApiResponse<String>>
+
+    @GET("/api/appointments/all")
+    suspend fun getAllAppointments(): Response<ApiResponse<List<AppointmentResponse>>>
+
+    @GET("/api/users/me")
+    suspend fun getUserProfile(): Response<ApiResponse<UserProfileResponse>>
+
+    @PUT("/api/users/me/password")
+    suspend fun changePassword(@Body payload: Map<String, String>): Response<ApiResponse<String>>
 }

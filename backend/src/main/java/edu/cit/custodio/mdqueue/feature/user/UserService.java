@@ -100,5 +100,49 @@ public class UserService {
         doctor.setSpecialty(specialty);
         return userRepository.save(doctor);
     }
+
+    @Transactional
+    public void changePassword(String email, String currentPassword, String newPassword, String confirmNewPassword) {
+        User user = findByEmail(email);
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        if (!newPassword.equals(confirmNewPassword)) {
+            throw new IllegalArgumentException("New password and confirm password do not match");
+        }
+
+        if (currentPassword.equals(newPassword)) {
+            throw new IllegalArgumentException("New password must be different from current password");
+        }
+
+        // Strategy Pattern: delegate password validation to the injected strategy
+        passwordValidator.validate(newPassword);
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    @Transactional
+    public User registerGoogleUser(String email, String fullName) {
+        // Since they authenticate via Google, we generate a secure random password placeholder
+        String randomPassword = java.util.UUID.randomUUID().toString();
+        
+        User user = User.builder()
+                .fullName(fullName)
+                .email(email.toLowerCase().trim())
+                .password(passwordEncoder.encode(randomPassword))
+                .role(User.Role.PATIENT)
+                .isApproved(true)
+                .build();
+                
+        return userRepository.save(user);
+    }
 }
+
 

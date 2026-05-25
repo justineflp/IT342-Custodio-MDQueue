@@ -16,7 +16,7 @@ object RetrofitClient {
 
     // Use 10.0.2.2 for Android Emulator to reach host machine's localhost
     // Change this to your PC's IP address if testing on a real device
-    private const val BASE_URL = "http://10.0.2.2:8080/"
+    const val BASE_URL = "http://10.0.2.2:8080/"
 
     var authToken: String? = null
 

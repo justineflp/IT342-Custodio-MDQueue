@@ -39,7 +39,7 @@ export default function QueueStatusPage() {
         ) : entries.length === 0 ? (
           <div className="empty-state-card">
             <div className="empty-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="48" height="48"><circle cx="12" cy="12" r="10"/><path d="M8 15h8M9 9h.01M15 9h.01"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="48" height="48"><circle cx="12" cy="12" r="10" /><path d="M8 15h8M9 9h.01M15 9h.01" /></svg>
             </div>
             <p>You're not in any queues right now.</p>
           </div>

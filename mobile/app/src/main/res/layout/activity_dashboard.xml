@@ -14,7 +14,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_input"
+            android:background="@drawable/bg_card"
             android:gravity="center"
             android:orientation="vertical"
             android:padding="24dp"
@@ -62,26 +62,15 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
+        <!-- PATIENT DASHBOARD LAYOUT -->
         <LinearLayout
-            android:id="@+id/layoutPatientActions"
+            android:id="@+id/layoutPatientDashboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone">
 
-            <Button
-                android:id="@+id/btnViewClinics"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:background="@drawable/bg_button_primary"
-                android:text="Join Queue / View Clinics"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"/>
-
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnBookAppointment"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
@@ -91,64 +80,35 @@
                 android:textColor="@color/white"
                 android:textSize="15sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="24dp"/>
-
-            <TextView
-                android:id="@+id/tvActiveQueueTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Active Queue Session"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:visibility="gone"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="12dp"/>
 
             <LinearLayout
-                android:id="@+id/cardActiveQueue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_input"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:visibility="gone"
+                android:orientation="horizontal"
                 android:layout_marginBottom="24dp">
 
-                <TextView
-                    android:id="@+id/tvQueueClinicName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Clinic Name"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnPatientAllAppointments"
+                    android:layout_width="0dp"
+                    android:layout_height="46dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_button_outline"
+                    android:text="All Appointments"
+                    android:textAllCaps="false"
+                    android:textColor="@color/primary"
+                    android:textSize="13sp"
                     android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/tvQueueName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Queue Name"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp"
-                    android:layout_marginTop="2dp" />
-
-                <TextView
-                    android:id="@+id/tvQueueTicket"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Ticket #00"
-                    android:textColor="@color/primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="8dp" />
-
-                <Button
-                    android:id="@+id/btnViewQueueStatus"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="16dp"
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnPatientProfile"
+                    android:layout_width="0dp"
+                    android:layout_height="46dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
                     android:background="@drawable/bg_button_outline"
-                    android:text="View Live Status"
+                    android:text="My Profile"
                     android:textAllCaps="false"
                     android:textColor="@color/primary"
                     android:textSize="13sp"
@@ -158,65 +118,21 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Upcoming Appointment"
+                android:text="Upcoming Appointments"
                 android:textColor="@color/text_primary"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp"/>
 
-            <LinearLayout
-                android:id="@+id/cardUpcomingAppointment"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvPatientAppointments"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_input"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:visibility="gone"
-                android:layout_marginBottom="24dp">
-
-                <TextView
-                    android:id="@+id/tvDoctorName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Doctor Name"
-                    android:textColor="@color/text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvApptDatetime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Datetime"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp"
-                    android:layout_marginTop="2dp" />
-
-                <TextView
-                    android:id="@+id/tvApptStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="PENDING"
-                    android:textColor="@color/primary"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="8dp" />
-
-                <Button
-                    android:id="@+id/btnViewDetails"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_marginTop="16dp"
-                    android:background="@drawable/bg_button_outline"
-                    android:text="View Details"
-                    android:textAllCaps="false"
-                    android:textColor="@color/primary"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="16dp" />
 
             <TextView
-                android:id="@+id/tvNoAppointments"
+                android:id="@+id/tvNoPatientAppointments"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -226,36 +142,292 @@
                 android:text="You have no upcoming appointments."
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp"
+                android:visibility="gone"
                 android:layout_marginBottom="24dp" />
-
         </LinearLayout>
 
+        <!-- DOCTOR DASHBOARD LAYOUT -->
         <LinearLayout
-            android:id="@+id/layoutDoctorActions"
+            android:id="@+id/layoutDoctorDashboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:visibility="gone">
 
-            <Button
-                android:id="@+id/btnViewSchedule"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:background="@drawable/bg_button_primary"
-                android:text="View My Schedule"
-                android:textAllCaps="false"
-                android:textColor="@color/white"
-                android:textSize="15sp"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnDoctorAllAppointments"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_button_primary"
+                    android:text="View My Schedule"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnDoctorProfile"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_button_outline"
+                    android:text="My Profile"
+                    android:textAllCaps="false"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvDoctorTodayTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Schedule for Today"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="24dp"/>
+                android:layout_marginBottom="8dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDoctorTodayAppointments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/tvNoDoctorTodayAppointments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="24dp"
+                android:background="@drawable/bg_input"
+                android:backgroundTint="#F3F4F6"
+                android:text="No patients scheduled for today."
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:visibility="gone"
+                android:layout_marginBottom="24dp" />
+
+            <TextView
+                android:id="@+id/tvDoctorUpcomingTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Upcoming Appointments"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDoctorUpcomingAppointments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/tvNoDoctorUpcomingAppointments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="24dp"
+                android:background="@drawable/bg_input"
+                android:backgroundTint="#F3F4F6"
+                android:text="No upcoming scheduled patients."
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:visibility="gone"
+                android:layout_marginBottom="24dp" />
+        </LinearLayout>
+
+        <!-- ADMIN DASHBOARD LAYOUT -->
+        <LinearLayout
+            android:id="@+id/layoutAdminDashboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="20dp">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnAdminAllAppointments"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:background="@drawable/bg_button_outline"
+                    android:text="Completed Records"
+                    android:textAllCaps="false"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/btnAdminProfile"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_button_outline"
+                    android:text="My Profile"
+                    android:textAllCaps="false"
+                    android:textColor="@color/primary"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Live System KPIs"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- KPIs Mini-Cards Grid -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="4dp"
+                    android:background="@drawable/bg_input"
+                    android:backgroundTint="#EFF6FF"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Appointments"
+                        android:textColor="#1E40AF"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tvKpiAppointments"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#1D4ED8"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="4dp"
+                    android:background="@drawable/bg_input"
+                    android:backgroundTint="#ECFDF5"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Active Docs"
+                        android:textColor="#065F46"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tvKpiActiveDoctors"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#047857"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:background="@drawable/bg_input"
+                    android:backgroundTint="#FFFBEB"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pending Approvals"
+                        android:textColor="#92400E"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                    <TextView
+                        android:id="@+id/tvKpiPendingDoctors"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="#B45309"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pending Doctor Approvals"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAdminApprovals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/tvNoAdminApprovals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:padding="24dp"
+                android:background="@drawable/bg_input"
+                android:backgroundTint="#F3F4F6"
+                android:text="No pending approvals."
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp"
+                android:visibility="gone"
+                android:layout_marginBottom="24dp" />
         </LinearLayout>
 
         <View
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_width="match_parent"
+            android:layout_height="20dp" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnLogout"
             android:layout_width="match_parent"
             android:layout_height="52dp"

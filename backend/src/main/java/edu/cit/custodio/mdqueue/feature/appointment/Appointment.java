@@ -45,6 +45,9 @@ public class Appointment {
     @Builder.Default
     private Status status = Status.PENDING;
 
+    @Column(name = "amount_due", precision = 10, scale = 2)
+    private java.math.BigDecimal amountDue;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

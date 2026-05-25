@@ -64,13 +64,16 @@ public class AppointmentService {
     }
 
     @Transactional
-    public AppointmentResponse updateStatus(Long appointmentId, String status) {
+    public AppointmentResponse updateStatus(Long appointmentId, String status, java.math.BigDecimal amountDue) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
         
         try {
             Appointment.Status newStatus = Appointment.Status.valueOf(status.toUpperCase());
             appointment.setStatus(newStatus);
+            if (amountDue != null) {
+                appointment.setAmountDue(amountDue);
+            }
             return mapToResponse(appointmentRepository.save(appointment));
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid status: " + status);
@@ -82,8 +85,12 @@ public class AppointmentService {
                 .id(appointment.getId())
                 .patientId(appointment.getPatient().getId())
                 .patientName(appointment.getPatient().getFullName())
+                .patientEmail(appointment.getPatient().getEmail())
+                .patientPhone(appointment.getPatient().getPhoneNumber())
                 .doctorId(appointment.getDoctor().getId())
                 .doctorName(appointment.getDoctor().getFullName())
+                .doctorSpecialty(appointment.getDoctor().getSpecialty() != null ? appointment.getDoctor().getSpecialty() : "General Practice")
+                .amountDue(appointment.getAmountDue())
                 .appointmentDatetime(appointment.getAppointmentDatetime())
                 .reason(appointment.getReason())
                 .notes(appointment.getNotes())
@@ -114,6 +121,7 @@ public class AppointmentService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public List<DocumentResponse> getDocumentsForAppointment(Long appointmentId) {
         return documentRepository.findByAppointmentIdOrderByUploadedAtDesc(appointmentId).stream()
                 .map(doc -> DocumentResponse.builder()
@@ -125,6 +133,7 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public MedicalDocument getDocument(Long documentId) {
         return documentRepository.findById(documentId)
                 .orElseThrow(() -> new IllegalArgumentException("Document not found"));

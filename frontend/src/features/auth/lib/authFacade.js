@@ -89,9 +89,36 @@ export async function register(data) {
 }
 
 /**
+ * Facade method for Google Login.
+ * Coordinates: API call → token storage → result formatting.
+ *
+ * @param {string} googleToken - The Google ID Token JWT or mock token
+ * @returns {Promise<{ success: boolean, data?: object, message?: string, errors?: object }>}
+ */
+export async function loginWithGoogle(googleToken) {
+  try {
+    const res = await api.post('/api/auth/google', { token: googleToken })
+    const payload = res.data.data || res.data
+    setToken(payload.token)
+    return {
+      success: true,
+      data: payload,
+    }
+  } catch (err) {
+    const { message, errors } = extractError(err)
+    return {
+      success: false,
+      message,
+      errors,
+    }
+  }
+}
+
+/**
  * The authFacade object — the single entry point for all auth operations.
  */
 export const authFacade = {
   login,
   register,
+  loginWithGoogle,
 }

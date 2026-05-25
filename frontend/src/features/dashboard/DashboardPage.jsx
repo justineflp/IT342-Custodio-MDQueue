@@ -53,13 +53,38 @@ export default function DashboardPage() {
   }
 
   async function handleUpdateAppointmentStatus(id, newStatus) {
+    let amountDue = null;
+    if (newStatus === 'CONFIRMED') {
+      const input = prompt("Please specify the custom consultation fee / billing amount due (PHP):", "1500.00");
+      if (input === null) return; // user cancelled the prompt
+      const parsedAmount = parseFloat(input);
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        alert("Please enter a valid billing amount greater than 0.");
+        return;
+      }
+      amountDue = parsedAmount.toFixed(2);
+    }
+
     try {
+      const payload = { status: newStatus };
+      if (amountDue) {
+        payload.amountDue = amountDue;
+      }
       const res = await apiFetch(`/appointments/${id}/status`, {
         method: 'PATCH',
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify(payload)
       })
       if (res.success) {
-        setAppointments(appts => appts.map(a => a.id === id ? {...a, status: newStatus} : a))
+        setAppointments(appts => appts.map(a => a.id === id ? {
+          ...a, 
+          status: newStatus,
+          amountDue: amountDue ? parseFloat(amountDue) : a.amountDue
+        } : a))
+        if (newStatus === 'CONFIRMED') {
+          alert(`Consultation confirmed successfully with fee of ₱${parseFloat(amountDue).toLocaleString('en-US', { minimumFractionDigits: 2 })}!`);
+        }
+      } else {
+        alert(res.message || "Failed to update status");
       }
     } catch (err) {
       console.error(err)
@@ -67,6 +92,32 @@ export default function DashboardPage() {
   }
 
   const role = user?.role || 'PATIENT'
+
+  const todayStr = new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0') + '-' + String(new Date().getDate()).padStart(2, '0');
+
+  const displayAppointments = role === 'ADMIN' 
+    ? appointments 
+    : role === 'PATIENT'
+      ? appointments.filter(a => {
+          if (a.status === 'COMPLETED' || a.status === 'CANCELLED') return false;
+          const apptDate = new Date(a.appointmentDatetime);
+          return apptDate > new Date();
+        })
+      : appointments.filter(a => a.status !== 'COMPLETED' && a.status !== 'CANCELLED');
+
+  const todayAppointments = role === 'DOCTOR' 
+    ? displayAppointments.filter(appt => {
+        const apptDateStr = appt.appointmentDatetime ? appt.appointmentDatetime.substring(0, 10) : '';
+        return apptDateStr === todayStr;
+      })
+    : [];
+
+  const upcomingAppointments = role === 'DOCTOR'
+    ? displayAppointments.filter(appt => {
+        const apptDateStr = appt.appointmentDatetime ? appt.appointmentDatetime.substring(0, 10) : '';
+        return apptDateStr > todayStr;
+      })
+    : [];
 
   return (
     <AppLayout>
@@ -143,48 +194,148 @@ export default function DashboardPage() {
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                   {role === 'PATIENT' ? 'Upcoming Appointments' : 'Your Schedule'}
                 </h2>
-                <span className="badge">{appointments.length}</span>
+                <span className="badge">{displayAppointments.length}</span>
               </div>
               
-              {appointments.length === 0 ? (
+              {displayAppointments.length === 0 ? (
                 <div className="empty-state">
                   <p>{role === 'PATIENT' ? 'You have no upcoming appointments.' : 'No appointments scheduled.'}</p>
                   {role === 'PATIENT' && (
                     <Link to="/book-appointment" className="primaryBtn small-btn">Book Now</Link>
                   )}
                 </div>
+              ) : role === 'DOCTOR' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  {/* Today's Schedule */}
+                  <div>
+                    <h3 style={{ 
+                      fontSize: '0.9rem', 
+                      textTransform: 'uppercase', 
+                      letterSpacing: '0.05em', 
+                      color: 'var(--blue)', 
+                      margin: '0 0 10px 0', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between',
+                      fontWeight: 700 
+                    }}>
+                      <span>Schedule for Today</span>
+                      <span className="badge" style={{ background: 'var(--blue-light)', color: 'var(--blue)', marginLeft: '8px' }}>
+                        {todayAppointments.length}
+                      </span>
+                    </h3>
+                    
+                    {todayAppointments.length === 0 ? (
+                      <p style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--muted)', background: 'var(--bg)', borderRadius: '10px', margin: 0 }}>
+                        No appointments scheduled for today.
+                      </p>
+                    ) : (
+                      <div className="entry-list">
+                        {todayAppointments.map(appt => (
+                          <div key={appt.id} className="entry-row" onClick={() => navigate(`/appointments/${appt.id}`)} style={{ cursor: 'pointer' }}>
+                            <div className="entry-info">
+                              <div className="entry-clinic">{`Patient: ${appt.patientName}`}</div>
+                              <div className="entry-queue">{new Date(appt.appointmentDatetime).toLocaleString()}</div>
+                            </div>
+                            <div className="entry-right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              <div className={`status-badge ${appt.status.toLowerCase()}`}>
+                                {appt.status}
+                              </div>
+                              {appt.status === 'PENDING' && (
+                                <div style={{ display: 'flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
+                                  <button 
+                                    className="primaryBtn small-btn" 
+                                    onClick={() => handleUpdateAppointmentStatus(appt.id, 'CONFIRMED')}
+                                    style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#10b981' }}
+                                  >Confirm</button>
+                                  <button 
+                                    className="secondaryBtn small-btn" 
+                                    onClick={() => handleUpdateAppointmentStatus(appt.id, 'CANCELLED')}
+                                    style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#ef4444', color: 'white', border: 'none' }}
+                                  >Cancel</button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Upcoming Schedule */}
+                  <div>
+                    <h3 style={{ 
+                      fontSize: '0.9rem', 
+                      textTransform: 'uppercase', 
+                      letterSpacing: '0.05em', 
+                      color: 'var(--purple)', 
+                      margin: '10px 0 10px 0', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between',
+                      fontWeight: 700 
+                    }}>
+                      <span>Upcoming Appointments</span>
+                      <span className="badge" style={{ background: 'var(--purple-light)', color: 'var(--purple)', marginLeft: '8px' }}>
+                        {upcomingAppointments.length}
+                      </span>
+                    </h3>
+
+                    {upcomingAppointments.length === 0 ? (
+                      <p style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--muted)', background: 'var(--bg)', borderRadius: '10px', margin: 0 }}>
+                        No upcoming appointments.
+                      </p>
+                    ) : (
+                      <div className="entry-list">
+                        {upcomingAppointments.map(appt => (
+                          <div key={appt.id} className="entry-row" onClick={() => navigate(`/appointments/${appt.id}`)} style={{ cursor: 'pointer' }}>
+                            <div className="entry-info">
+                              <div className="entry-clinic">{`Patient: ${appt.patientName}`}</div>
+                              <div className="entry-queue">{new Date(appt.appointmentDatetime).toLocaleString()}</div>
+                            </div>
+                            <div className="entry-right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                              <div className={`status-badge ${appt.status.toLowerCase()}`}>
+                                {appt.status}
+                              </div>
+                              {appt.status === 'PENDING' && (
+                                <div style={{ display: 'flex', gap: '6px' }} onClick={(e) => e.stopPropagation()}>
+                                  <button 
+                                    className="primaryBtn small-btn" 
+                                    onClick={() => handleUpdateAppointmentStatus(appt.id, 'CONFIRMED')}
+                                    style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#10b981' }}
+                                  >Confirm</button>
+                                  <button 
+                                    className="secondaryBtn small-btn" 
+                                    onClick={() => handleUpdateAppointmentStatus(appt.id, 'CANCELLED')}
+                                    style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#ef4444', color: 'white', border: 'none' }}
+                                  >Cancel</button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               ) : (
                 <div className="entry-list">
-                  {appointments.slice(0, 5).map(appt => (
+                  {displayAppointments.slice(0, 5).map(appt => (
                     <div key={appt.id} className="entry-row" onClick={() => navigate(`/appointments/${appt.id}`)} style={{ cursor: 'pointer' }}>
                       <div className="entry-info">
-                        <div className="entry-clinic">{role === 'PATIENT' ? `Dr. ${appt.doctorName}` : `Patient: ${appt.patientName}`}</div>
+                        <div className="entry-clinic">{`Dr. ${appt.doctorName}`}</div>
                         <div className="entry-queue">{new Date(appt.appointmentDatetime).toLocaleString()}</div>
                       </div>
                       <div className="entry-right" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <div className={`status-badge ${appt.status.toLowerCase()}`}>
                           {appt.status}
                         </div>
-                        {role === 'DOCTOR' && appt.status === 'PENDING' && (
-                          <div style={{ display: 'flex', gap: '6px' }}>
-                            <button 
-                              className="primaryBtn small-btn" 
-                              onClick={(e) => { e.stopPropagation(); handleUpdateAppointmentStatus(appt.id, 'CONFIRMED'); }}
-                              style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#10b981' }}
-                            >Confirm</button>
-                            <button 
-                              className="secondaryBtn small-btn" 
-                              onClick={(e) => { e.stopPropagation(); handleUpdateAppointmentStatus(appt.id, 'CANCELLED'); }}
-                              style={{ padding: '6px 12px', fontSize: '0.8rem', background: '#ef4444', color: 'white', border: 'none' }}
-                            >Cancel</button>
-                          </div>
-                        )}
                       </div>
                     </div>
                   ))}
-                  {appointments.length > 5 && (
+                  {displayAppointments.length > 5 && (
                     <Link to="/my-appointments" style={{ display: 'block', textAlign: 'center', marginTop: '10px', fontSize: '0.9rem' }}>
-                      View all {appointments.length} appointments
+                      View all {displayAppointments.length} appointments
                     </Link>
                   )}
                 </div>

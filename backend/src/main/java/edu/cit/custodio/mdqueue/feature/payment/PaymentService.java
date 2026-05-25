@@ -22,27 +22,33 @@ public class PaymentService {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
 
-        // Simulate a fixed price consultation fee
-        BigDecimal amount = new BigDecimal("50.00");
+        // Use the dynamically set amountDue from the appointment, fallback to 50.00 if unset
+        BigDecimal amount = appointment.getAmountDue() != null ? appointment.getAmountDue() : new BigDecimal("50.00");
 
-        // Simulate sandbox logic (if paymentMethodId starts with "tok_fail", simulate failure)
-        boolean isSuccess = paymentMethodId != null && !paymentMethodId.startsWith("tok_fail");
+        // Determine status and provider
+        String provider = "Sandbox Gateway";
+        Payment.Status status = Payment.Status.SUCCESS;
+        
+        if ("GCASH".equalsIgnoreCase(paymentMethodId)) {
+            provider = "GCash";
+        } else if ("CARD".equalsIgnoreCase(paymentMethodId)) {
+            provider = "Credit/Debit Card";
+        } else if ("PAY_IN_PERSON".equalsIgnoreCase(paymentMethodId)) {
+            provider = "Pay in Person";
+            status = Payment.Status.PENDING; // Pay in person is pending until clinic checkout
+        } else if (paymentMethodId != null && paymentMethodId.startsWith("tok_fail")) {
+            status = Payment.Status.FAILED;
+        }
 
         Payment payment = Payment.builder()
                 .appointment(appointment)
                 .amount(amount)
-                .currency("USD")
-                .provider("Sandbox Gateway")
+                .currency("PHP")
+                .provider(provider)
                 .providerPaymentId(UUID.randomUUID().toString())
-                .status(isSuccess ? Payment.Status.SUCCESS : Payment.Status.FAILED)
-                .paidAt(isSuccess ? LocalDateTime.now() : null)
+                .status(status)
+                .paidAt(status == Payment.Status.SUCCESS ? LocalDateTime.now() : null)
                 .build();
-
-        if (isSuccess) {
-            // Automatically confirm appointment if payment succeeds
-            appointment.setStatus(Appointment.Status.CONFIRMED);
-            appointmentRepository.save(appointment);
-        }
 
         return paymentRepository.save(payment);
     }

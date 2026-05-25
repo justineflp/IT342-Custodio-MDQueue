@@ -6,6 +6,7 @@ import AdminDoctorsPage from './features/dashboard/AdminDoctorsPage'
 import BookAppointmentPage from './features/appointment/BookAppointmentPage'
 import AppointmentsPage from './features/appointment/AppointmentsPage'
 import AppointmentDetailPage from './features/appointment/AppointmentDetailPage'
+import PaymentPage from './features/appointment/PaymentPage'
 import ProfilePage from './features/profile/ProfilePage'
 import ProtectedRoute from './shared/components/ProtectedRoute'
 
@@ -52,6 +53,14 @@ export default function App() {
         element={
           <ProtectedRoute>
             <AppointmentDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/appointments/:id/payment"
+        element={
+          <ProtectedRoute>
+            <PaymentPage />
           </ProtectedRoute>
         }
       />

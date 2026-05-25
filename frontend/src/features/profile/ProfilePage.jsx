@@ -3,6 +3,7 @@ import AppLayout from '../../shared/components/AppLayout'
 import { getUserProfile } from '../queue/queueApi'
 import { getMyEntries } from '../queue/queueApi'
 import { updateSpecialty } from '../appointment/appointmentApi'
+import { apiFetch } from '../../shared/lib/api'
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null)
@@ -11,6 +12,14 @@ export default function ProfilePage() {
   const [specialty, setSpecialty] = useState('')
   const [saving, setSaving] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
+
+  // Change password state
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmNewPassword, setConfirmNewPassword] = useState('')
+  const [pwSaving, setPwSaving] = useState(false)
+  const [pwSuccess, setPwSuccess] = useState('')
+  const [pwError, setPwError] = useState('')
 
   const specialties = [
     "General Practice",
@@ -24,7 +33,6 @@ export default function ProfilePage() {
     "Gynecology",
     "Ophthalmology"
   ]
-
 
   useEffect(() => {
     async function load() {
@@ -59,6 +67,44 @@ export default function ProfilePage() {
       console.error(err)
     }
     setSaving(false)
+  }
+
+  const handleChangePassword = async () => {
+    setPwError('')
+    setPwSuccess('')
+
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      setPwError('All password fields are required')
+      return
+    }
+    if (newPassword !== confirmNewPassword) {
+      setPwError('New password and confirm password do not match')
+      return
+    }
+    if (currentPassword === newPassword) {
+      setPwError('New password must be different from current password')
+      return
+    }
+
+    setPwSaving(true)
+    try {
+      const res = await apiFetch('/users/me/password', {
+        method: 'PUT',
+        body: JSON.stringify({ currentPassword, newPassword, confirmNewPassword })
+      })
+      if (res.success) {
+        setPwSuccess('Password changed successfully!')
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmNewPassword('')
+        setTimeout(() => setPwSuccess(''), 4000)
+      } else {
+        setPwError(res.message || 'Failed to change password')
+      }
+    } catch (err) {
+      setPwError('An error occurred. Please try again.')
+    }
+    setPwSaving(false)
   }
 
   if (loading) {
@@ -151,6 +197,57 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+
+        {/* Change Password Card */}
+        <div className="card" style={{ marginTop: '24px', padding: '28px' }}>
+          <h2 className="dash-card-title" style={{ marginBottom: '20px' }}>Change Password</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '460px' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--muted)', marginBottom: '6px' }}>Current Password</label>
+              <input
+                className="input"
+                type="password"
+                placeholder="Enter current password"
+                value={currentPassword}
+                onChange={(e) => { setCurrentPassword(e.target.value); setPwError('') }}
+                style={{ width: '100%', padding: '10px 14px' }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--muted)', marginBottom: '6px' }}>New Password</label>
+              <input
+                className="input"
+                type="password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => { setNewPassword(e.target.value); setPwError('') }}
+                style={{ width: '100%', padding: '10px 14px' }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--muted)', marginBottom: '6px' }}>Confirm New Password</label>
+              <input
+                className="input"
+                type="password"
+                placeholder="Confirm new password"
+                value={confirmNewPassword}
+                onChange={(e) => { setConfirmNewPassword(e.target.value); setPwError('') }}
+                style={{ width: '100%', padding: '10px 14px' }}
+              />
+            </div>
+            {pwError && <p style={{ color: '#EF4444', fontSize: '0.9rem', margin: '0' }}>{pwError}</p>}
+            {pwSuccess && <p style={{ color: '#10B981', fontSize: '0.9rem', margin: '0' }}>{pwSuccess}</p>}
+            <button
+              className="primaryBtn"
+              onClick={handleChangePassword}
+              disabled={pwSaving || !currentPassword || !newPassword || !confirmNewPassword}
+              style={{ marginTop: '4px', maxWidth: '200px' }}
+            >
+              {pwSaving ? 'Changing...' : 'Change Password'}
+            </button>
+          </div>
+        </div>
+
       </div>
     </AppLayout>
   )

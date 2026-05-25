@@ -25,3 +25,7 @@ data class RegisterRequest(
     @SerializedName("confirmPassword") val confirmPassword: String,
     @SerializedName("role") val role: String
 )
+
+data class GoogleLoginRequest(
+    @SerializedName("token") val token: String
+)

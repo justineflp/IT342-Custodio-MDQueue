@@ -16,7 +16,8 @@ data class AppointmentResponse(
     @SerializedName("doctorName") val doctorName: String,
     @SerializedName("appointmentDatetime") val appointmentDatetime: String,
     @SerializedName("reason") val reason: String,
-    @SerializedName("status") val status: String
+    @SerializedName("status") val status: String,
+    @SerializedName("amountDue") val amountDue: Double?
 )
 
 data class PaymentRequest(
@@ -42,4 +43,21 @@ data class DoctorResponse(
     @SerializedName("specialty") val specialty: String?,
     @SerializedName("initials") val initials: String?,
     @SerializedName("color") val color: String?
+)
+
+data class AdminDoctorResponse(
+    @SerializedName("id") val id: Long,
+    @SerializedName("fullName") val fullName: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("isApproved") val isApproved: Boolean,
+    @SerializedName("specialty") val specialty: String?
+)
+
+data class UserProfileResponse(
+    @SerializedName("id") val id: Long,
+    @SerializedName("fullName") val fullName: String,
+    @SerializedName("email") val email: String,
+    @SerializedName("phoneNumber") val phoneNumber: String?,
+    @SerializedName("role") val role: String,
+    @SerializedName("specialty") val specialty: String?
 )

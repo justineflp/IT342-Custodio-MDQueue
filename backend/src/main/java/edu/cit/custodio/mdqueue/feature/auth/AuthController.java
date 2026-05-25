@@ -5,6 +5,7 @@ import edu.cit.custodio.mdqueue.shared.dto.ApiResponse;
 import edu.cit.custodio.mdqueue.feature.auth.dto.AuthResponse;
 import edu.cit.custodio.mdqueue.feature.auth.dto.LoginRequest;
 import edu.cit.custodio.mdqueue.feature.auth.dto.RegisterRequest;
+import edu.cit.custodio.mdqueue.feature.auth.dto.GoogleLoginRequest;
 import edu.cit.custodio.mdqueue.feature.auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,15 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         AuthResponse authResponse = authService.login(request);
+        // Adapter Pattern: convert domain AuthResponse → standardized ApiResponse
+        ApiResponse<AuthResponse> response = ApiResponseAdapter.toSuccessResponse(
+                authResponse, authResponse.getMessage());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<AuthResponse>> loginWithGoogle(@Valid @RequestBody GoogleLoginRequest request) {
+        AuthResponse authResponse = authService.loginWithGoogle(request);
         // Adapter Pattern: convert domain AuthResponse → standardized ApiResponse
         ApiResponse<AuthResponse> response = ApiResponseAdapter.toSuccessResponse(
                 authResponse, authResponse.getMessage());

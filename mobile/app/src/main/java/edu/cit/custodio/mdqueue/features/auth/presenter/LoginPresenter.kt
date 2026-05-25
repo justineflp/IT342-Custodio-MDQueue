@@ -4,6 +4,7 @@ import edu.cit.custodio.mdqueue.core.network.NetworkResult
 import edu.cit.custodio.mdqueue.core.network.RetrofitClient
 import edu.cit.custodio.mdqueue.features.auth.LoginContract
 import edu.cit.custodio.mdqueue.features.auth.model.LoginRequest
+import edu.cit.custodio.mdqueue.features.auth.model.GoogleLoginRequest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,6 +35,41 @@ class LoginPresenter(private val view: LoginContract.View) : LoginContract.Prese
                             401 -> "Invalid email or password"
                             403 -> "Invalid email or password"
                             else -> "Login failed. Please try again."
+                        }
+                        view.onLoginResult(NetworkResult.Error(errorMsg))
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    view.onLoginResult(NetworkResult.Error("Network error. Please try again later."))
+                }
+            }
+        }
+    }
+
+    override fun loginWithGoogle(token: String) {
+        view.onLoginResult(NetworkResult.Loading())
+
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.authApi.loginWithGoogle(
+                    GoogleLoginRequest(token = token)
+                )
+
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && response.body() != null) {
+                        val apiResponse = response.body()!!
+                        
+                        if (apiResponse.success && apiResponse.data != null) {
+                            view.onLoginResult(NetworkResult.Success(apiResponse.data))
+                        } else {
+                            view.onLoginResult(NetworkResult.Error(apiResponse.message ?: "Google login failed"))
+                        }
+                    } else {
+                        val errorMsg = when (response.code()) {
+                            401 -> "Invalid Google credentials"
+                            403 -> "Google login forbidden"
+                            else -> "Google login failed. Please try again."
                         }
                         view.onLoginResult(NetworkResult.Error(errorMsg))
                     }

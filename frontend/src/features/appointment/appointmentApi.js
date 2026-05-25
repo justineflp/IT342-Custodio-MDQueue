@@ -63,6 +63,14 @@ export async function getDocuments(appointmentId) {
   return apiFetch(`/appointments/${appointmentId}/documents`)
 }
 
+export async function getAppointmentDetails(id) {
+  return apiFetch(`/appointments/${id}`)
+}
+
 export function getDocumentDownloadUrl(docId) {
-  return `http://localhost:8080/api/appointments/documents/${docId}`
+  return `/api/appointments/documents/${docId}`
+}
+
+export async function getPaymentDetails(appointmentId) {
+  return apiFetch(`/payments/${appointmentId}`)
 }

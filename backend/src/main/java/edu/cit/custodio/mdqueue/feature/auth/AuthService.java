@@ -15,6 +15,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import edu.cit.custodio.mdqueue.feature.auth.dto.GoogleLoginRequest;
+import org.springframework.web.client.RestTemplate;
+import java.util.Map;
 
 /**
  * Service handling authentication operations (login and registration).
@@ -99,5 +102,71 @@ public class AuthService {
                 .role(user.getRole().name())
                 .message(message)
                 .build();
+    }
+
+    public AuthResponse loginWithGoogle(GoogleLoginRequest request) {
+        String googleToken = request.getToken();
+        String email;
+        String fullName;
+        boolean isMock = false;
+
+        if (googleToken != null && googleToken.startsWith("mock_google_token_")) {
+            // Simulation Bypass Mode for Dev/Demo
+            email = googleToken.substring("mock_google_token_".length()).toLowerCase().trim();
+            if (email.isBlank()) {
+                email = "demo.google.user@example.com";
+            }
+            fullName = "Demo Google User";
+            isMock = true;
+        } else {
+            // Real OAuth: verify the token using Google tokeninfo API
+            RestTemplate restTemplate = new RestTemplate();
+            Map<String, Object> payload;
+            try {
+                payload = restTemplate.getForObject("https://oauth2.googleapis.com/tokeninfo?id_token={token}", Map.class, googleToken);
+            } catch (Exception e) {
+                throw new InvalidCredentialsException("Invalid Google token verification failed");
+            }
+
+            if (payload == null || !payload.containsKey("email")) {
+                throw new InvalidCredentialsException("Invalid Google token payload");
+            }
+
+            email = ((String) payload.get("email")).toLowerCase().trim();
+            fullName = (String) payload.get("name");
+            if (fullName == null || fullName.isBlank()) {
+                fullName = (String) payload.get("given_name");
+                if (fullName == null || fullName.isBlank()) {
+                    fullName = "Google User";
+                }
+            }
+        }
+
+        // Retrieve or register user
+        User user;
+        boolean isNewUser = false;
+        if (userService.existsByEmail(email)) {
+            user = userService.findByEmail(email);
+        } else {
+            user = userService.registerGoogleUser(email, fullName);
+            isNewUser = true;
+        }
+
+        // Generate application security details
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())
+                .password(user.getPassword())
+                .authorities("ROLE_USER")
+                .build();
+        String token = jwtService.generateToken(userDetails);
+
+        String modeSuffix = isMock ? " (Simulated)" : "";
+        if (isNewUser) {
+            authEventPublisher.publishRegisterEvent(user);
+            return buildAuthResponse(user, token, "Google account" + modeSuffix + " registered and logged in successfully");
+        } else {
+            authEventPublisher.publishLoginEvent(user);
+            return buildAuthResponse(user, token, "Google login" + modeSuffix + " successful");
+        }
     }
 }

@@ -48,7 +48,8 @@
 
         <activity android:name=".features.appointment.view.BookAppointmentActivity" />
         <activity android:name=".features.appointment.view.AppointmentDetailActivity" />
-
+        <activity android:name=".features.appointment.view.AppointmentsActivity" />
+        <activity android:name=".features.profile.view.ProfileActivity" />
     </application>
 
 </manifest>
